@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Secret Letter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- GOOGLE FONTS -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+/* ===== RESET ===== */
+body {
+  margin: 0;
+  padding: 0;
+  background: #ffd5e5;
+  font-family: 'Playfair Display', serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* ===== LOGIN SCREEN ===== */
+#login-screen {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 0 25px rgba(255,100,150,0.4);
+  text-align: center;
+}
+
+#login-screen h2 {
+  color: #d1417b;
+  font-size: 20px;
+}
+
+input {
+  padding: 10px 16px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 2px solid #ff9ac9;
+  outline: none;
+  margin-top: 10px;
+}
+
+button {
+  margin-top: 15px;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 12px;
+  background: #ff76b8;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #ff5aa7;
+}
+
+#error-msg {
+  margin-top: 15px;
+  color: #d60046;
+  display: none;
+}
+
+/* ===== MAIN PAGE ===== */
+#main-page {
+  display: none;
+  animation: fadeIn 1s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ===== ENVELOPE ===== */
+.envelope-container {
+  background: #f5f0e7;
+  width: 650px;
+  padding: 70px 50px;
+  border-radius: 6px;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+  position: relative;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.envelope-container:hover {
+  transform: scale(1.02);
+}
+
+/* Nếp gấp thư */
+.envelope-container::before,
+.envelope-container::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: #efe8dd;
+}
+
+.envelope-container::before {
+  top: 0;
+  clip-path: polygon(0 100%, 50% 0, 100% 100%);
+}
+
+.envelope-container::after {
+  bottom: 0;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+.card {
+  color: #8b0000;
+}
+
+/* Text */
+.title {
+  font-family: "Great Vibes", cursive;
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.message {
+  font-size: 20px;
+  margin-bottom: 30px;
+}
+
+.date {
+  font-size: 16px;
+  margin-bottom: 35px;
+  font-style: italic;
+}
+
+/* Seal */
+.seal {
+  width: 95px;
+  height: 95px;
+  background: #9c0f2a;
+  margin: 0 auto 40px;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 10px rgba(0,0,0,0.3),
+    0 5px 10px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+.seal::after {
+  content: "✦";
+  color: #ffdddd;
+  font-size: 45px;
+  position: absolute;
+  top: 23px;
+  left: 29px;
+}
+
+.footer {
+  margin-top: 15px;
+  font-size: 16px;
+  text-transform: uppercase;
+  color: #7a0e19;
+}
+
+.footer strong {
+  font-family: "Playfair Display", serif;
+}
+
+/* ===== MODAL LETTER OPEN ===== */
+#letter-modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff0f7;
+  padding: 35px;
+  border-radius: 25px;
+  width: 90%;
+  max-width: 550px;
+  max-height: 80vh; /* giới hạn chiều cao modal */
+  overflow-y: auto; /* cuộn nếu nội dung dài */
+  box-shadow: 0 0 30px rgba(255, 120, 150, .35);
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: #8b0000; /* đồng bộ màu chữ với bìa thư */
+  line-height: 1.6em;
+  text-align: center;
+  animation: fadeIn 0.6s ease;
+}
+
+#close-btn {
+  margin-top: 20px;
+  background: #ff6fa8;
+}
+
+/* ===== SCROLLBAR STYLE (optional) ===== */
+#letter-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+#letter-modal::-webkit-scrollbar-thumb {
+  background-color: #ff76b8;
+  border-radius: 4px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="login-screen">
+  <h2>Hãy nhập mật khẩu để mở thư nhee 💖</h2>
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="checkPassword()">Log In</button>
+  <div id="error-msg">Wrong password!</div>
+</div>
+
+<!-- ===== AUDIO ===== -->
+<audio id="bg-music" loop>
+  <source src="co-em-la-nha.mp3" type="audio/mp3">
+</audio>
+
+<!-- ===== MAIN PAGE ===== -->
+<div id="main-page">
+  <div class="envelope-container" onclick="openLetter()">
+    <div class="card">
+      <h1 class="title">Happy International Men's Day</h1>
+
+      <p class="message">
+        "Khi bão giông bủa vây <br>
+        Đừng lo nhé anh vẫn luôn còn lại một lối đi<br>
+        Về bên em tạm quên những nghĩ suy<br>
+        Em hiểu những khó khăn anh mang<br>
+        Chẳng cần tỏ ra mạnh mẽ đâu<br>
+        Sớm mai mây mù sẽ tan em vẫn ở đây<br>
+        Đã có em là nhà"
+      </p>
+
+      <p class="date">19.11.2025</p>
+
+      <div class="seal"></div>
+
+      <div class="footer">
+        <p><strong>To:</strong> người của chloee </p>
+        <p><strong>From:</strong> baby chloe cutii hí hí hí</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL CONTENT ===== -->
+<div id="letter-modal">
+  💌 Dear danh iuu, 💖<br><br>
+  Cảm ơn danh và uyn đã cho nhau thêm một cơ hội nữa để uyn có thể gửi đến danh những lời yêu thương vào hôm nay.<br><br>
+  Đối với uyn, một tình yêu đẹp là khi cả hai đều hạnh phúc với cuộc sống riêng của mình, song đôi bên luôn hướng về nhau, đồng hành và chia sẻ với nhau những câu chuyện của bản thân dù chỉ là những điều nhỏ nhặt và vụn vặt nhất.<br><br>
+  Dù bão giông ngoài kia có thế nào, uyn luôn tin rằng chúng mình sẽ cùng nhau vượt qua. Vậy nên, danh hãy luôn giữ một sức khỏe thật tốt, tận hưởng những gì danh đang làm tại MTA và đừng quên rằng uyn luôn ở đây, theo dõi và ủng hộ danh từ xa.<br><br>
+  Mỗi ngày bên nhau là một món quà, mỗi khoảnh khắc là một kỷ niệm, uyn hi vọng những điều tốt đẹp nhất sẽ luôn đến với danh.<br><br>
+  Thương danh nhiều, <br>
+  <em>Chloe ❤️</em>
+  <br><br>
+  <button id="close-btn" onclick="closeLetter()">Close</button>
+</div>
+
+<script>
+/* ===== CHECK PASSWORD ===== */
+function checkPassword() {
+  const pwd = document.getElementById("password").value;
+
+  if (pwd === "0206") {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("main-page").style.display = "block";
+
+    const bg = document.getElementById("bg-music");
+    bg.volume = 0.35;
+    bg.play();
+  } else {
+    document.getElementById("error-msg").style.display = "block";
+  }
+}
+
+/* ===== OPEN LETTER ===== */
+function openLetter() {
+  document.getElementById("letter-modal").style.display = "block";
+}
+
+/* ===== CLOSE LETTER ===== */
+function closeLetter() {
+  document.getElementById("letter-modal").style.display = "none";
+}
+</script>
+
+</body>
+</html>
